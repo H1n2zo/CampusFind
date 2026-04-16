@@ -50,7 +50,6 @@ $cats  = categories();
   </a>
   <div class="nav-actions">
     <button class="nav-btn nav-btn-ghost" onclick="openReportModal()">+ Report Item</button>
-    <a class="nav-btn nav-btn-gold" href="admin/index.php">Admin Panel</a>
   </div>
 </nav>
 
