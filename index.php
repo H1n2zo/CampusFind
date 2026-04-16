@@ -170,14 +170,16 @@ $cats  = categories();
 
 <!-- ══ REPORT MODAL ══ -->
 <div id="modal-report" class="modal-overlay" onclick="closeOverlay(event,'modal-report')">
-  <div class="modal">
-    <div class="modal-header">
+  <div class="modal" style="max-width:820px;width:95vw;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;max-height:90vh;">
+    <div class="modal-header" style="flex-shrink:0;">
       <span class="modal-title">Report an Item</span>
       <button class="modal-close" onclick="closeModal('modal-report')">✕</button>
     </div>
-    <form method="POST" action="ajax/submit_report.php" id="form-report" enctype="multipart/form-data">
-      <div class="modal-body">
-        <div class="report-type-row">
+    <form method="POST" action="ajax/submit_report.php" id="form-report" enctype="multipart/form-data" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+      <div class="modal-body" style="flex:1;overflow-y:auto;padding:1.5rem;">
+
+        <!-- Type selector — full width row -->
+        <div class="report-type-row" style="margin-bottom:1.2rem;">
           <div class="report-type-btn" id="rtype-lost" onclick="selectType('lost')">
             <span class="rtype-icon">😟</span>
             <span class="rtype-label">I Lost Something</span>
@@ -188,44 +190,63 @@ $cats  = categories();
           </div>
         </div>
         <input type="hidden" name="type" id="report-type-val">
-        <p class="form-error" id="err-type" style="display:block;margin-bottom:8px;">Please select Lost or Found.</p>
-        <div class="form-group">
-          <label class="form-label">Item Name *</label>
-          <input class="form-input" name="name" id="report-name" type="text" placeholder="e.g. Black Samsung Galaxy S24…" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Category *</label>
-          <select class="form-select" name="category" required>
-            <option value="">Select category…</option>
-            <?php foreach ($cats as $cat): ?>
-              <option value="<?= e($cat) ?>"><?= e($cat) ?></option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Location *</label>
-          <input class="form-input" name="location" type="text" placeholder="e.g. Library 2nd Floor…" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Description <span class="form-optional">(optional)</span></label>
-          <textarea class="form-textarea" name="description" rows="3" placeholder="Color, brand, distinguishing features…"></textarea>
-        </div>
-        <!-- Photo upload -->
-        <div class="form-group">
-          <label class="form-label">Photo <span class="form-optional">(optional — helps identification)</span></label>
-          <input class="form-input" type="file" name="item_image" id="item-image-input"
-                 accept="image/jpeg,image/png,image/gif,image/webp"
-                 onchange="previewUpload(this)" style="padding:6px 10px;">
-          <div class="upload-preview-wrap">
-            <img id="upload-preview" class="upload-preview-img" alt="Preview">
+        <p class="form-error" id="err-type" style="display:block;margin-bottom:10px;">Please select Lost or Found.</p>
+
+        <!-- Two-column layout -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;align-items:start;">
+
+          <!-- LEFT COLUMN -->
+          <div style="display:flex;flex-direction:column;gap:1rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Item Name *</label>
+              <input class="form-input" name="name" id="report-name" type="text" placeholder="e.g. Black Samsung Galaxy S24…" required>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Category *</label>
+              <select class="form-select" name="category" required>
+                <option value="">Select category…</option>
+                <?php foreach ($cats as $cat): ?>
+                  <option value="<?= e($cat) ?>"><?= e($cat) ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Location *</label>
+              <input class="form-input" name="location" type="text" placeholder="e.g. Library 2nd Floor…" required>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Description <span class="form-optional">(optional)</span></label>
+              <textarea class="form-textarea" name="description" rows="4" placeholder="Color, brand, distinguishing features…"></textarea>
+            </div>
           </div>
-          <p class="form-hint">JPG, PNG, GIF or WebP · max 5 MB</p>
-        </div>
-        <p class="form-hint">Post will be reviewed by admin before appearing on the board.</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-full btn-cancel" onclick="closeModal('modal-report')">Cancel</button>
-        <button type="submit" class="btn btn-full btn-submit">Submit Report</button>
+
+          <!-- RIGHT COLUMN -->
+          <div style="display:flex;flex-direction:column;gap:1rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Photo <span class="form-optional">(optional)</span></label>
+              <input class="form-input" type="file" name="item_image" id="item-image-input"
+                     accept="image/jpeg,image/png,image/gif,image/webp"
+                     onchange="previewUpload(this)" style="padding:6px 10px;">
+              <p class="form-hint" style="margin-top:4px;">JPG, PNG, GIF or WebP · max 5 MB</p>
+            </div>
+
+            <!-- Preview box — fixed height placeholder -->
+            <div style="width:100%;height:200px;border-radius:10px;border:2px dashed var(--border-strong);background:var(--cream);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;">
+              <span id="upload-placeholder" style="font-size:13px;color:var(--text-light);">Preview will appear here</span>
+              <img id="upload-preview" alt="Preview"
+                   style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:8px;">
+            </div>
+
+            <p class="form-hint" style="margin-top:-4px;">Post will be reviewed by admin before appearing on the board.</p>
+          </div>
+
+        </div><!-- end grid -->
+      </div><!-- end modal-body -->
+
+      <!-- Footer with buttons on the right -->
+      <div class="modal-footer" style="flex-shrink:0;border-top:1px solid var(--border);padding:1rem 1.5rem;display:flex;justify-content:flex-end;gap:10px;">
+        <button type="button" class="btn btn-cancel" style="padding:10px 24px;font-size:14px;" onclick="closeModal('modal-report')">Cancel</button>
+        <button type="submit" class="btn btn-submit" style="padding:10px 24px;font-size:14px;">Submit Report</button>
       </div>
     </form>
   </div>
@@ -302,16 +323,19 @@ function selectType(t) {
 }
 
 function previewUpload(input) {
-  const preview = document.getElementById('upload-preview');
+  const preview     = document.getElementById('upload-preview');
+  const placeholder = document.getElementById('upload-placeholder');
   if (input.files && input.files[0]) {
     const reader = new FileReader();
     reader.onload = e => {
       preview.src = e.target.result;
       preview.style.display = 'block';
+      placeholder.style.display = 'none';
     };
     reader.readAsDataURL(input.files[0]);
   } else {
     preview.style.display = 'none';
+    placeholder.style.display = 'block';
   }
 }
 

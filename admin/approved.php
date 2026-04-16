@@ -4,6 +4,7 @@
 // ============================================================
 session_start();
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/auth_guard.php';
 
 $flash = $_SESSION['flash'] ?? null;
 if (isset($_SESSION['flash'])) unset($_SESSION['flash']);
@@ -35,7 +36,9 @@ $allClaims = getClaimRequests();
     </div>
   </a>
   <div class="nav-actions">
+    <span style="font-size:12px;color:rgba(255,255,255,0.55);margin-right:4px;">👤 <?= e($_SESSION['admin_username']) ?></span>
     <a class="nav-btn nav-btn-ghost" href="../index.php">← Public Board</a>
+    <a class="nav-btn nav-btn-ghost" href="logout.php" onclick="return confirm('Log out?')">Logout</a>
   </div>
 </nav>
 
@@ -58,6 +61,7 @@ $allClaims = getClaimRequests();
     <a class="admin-nav-item" href="dashboard.php"><span>📊</span> Dashboard</a>
     <div class="admin-sidebar-title">Quick</div>
     <a class="admin-nav-item" href="../index.php"><span>↩</span> Back to Board</a>
+    <a class="admin-nav-item" href="logout.php" onclick="return confirm('Log out?')"><span>🚪</span> Logout</a>
   </div>
 
   <div class="admin-main">
@@ -83,6 +87,7 @@ $allClaims = getClaimRequests();
           <thead>
             <tr>
               <th>#</th>
+              <th>Image</th>
               <th>Item</th>
               <th>Type</th>
               <th>Location</th>
@@ -96,6 +101,14 @@ $allClaims = getClaimRequests();
             <?php foreach ($items as $item): ?>
             <tr>
               <td style="color:var(--text-light);font-size:11px;"><?= $item['id'] ?></td>
+              <td>
+                <?php if (!empty($item['image_path'])): ?>
+                  <img src="../<?= e($item['image_path']) ?>" alt="Item photo"
+                       style="width:48px;height:48px;object-fit:cover;border-radius:7px;border:1px solid var(--border);">
+                <?php else: ?>
+                  <span style="font-size:20px;display:block;text-align:center;color:var(--text-light);">📷</span>
+                <?php endif; ?>
+              </td>
               <td>
                 <div class="td-title"><?= e($item['name']) ?></div>
                 <div class="td-sub"><?= e($item['category']) ?></div>

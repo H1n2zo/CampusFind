@@ -218,7 +218,10 @@ nav {
 .modal-overlay.open { display: flex; }
 .modal {
   background: white; border-radius: 16px;
-  width: 100%; max-width: 480px;
+  width: 100%; max-width: 560px;
+  max-height: 120vh;           
+  display: flex;             
+  flex-direction: column;     
   box-shadow: var(--shadow-lg); overflow: hidden;
 }
 .modal-header {
@@ -232,7 +235,11 @@ nav {
   font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background 0.2s;
 }
 .modal-close:hover { background: rgba(255,255,255,0.25); }
-.modal-body { padding: 1.5rem; }
+.modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;         
+  flex: 1;                 
+}
 .modal-footer { padding: 0 1.5rem 1.5rem; display: flex; gap: 10px; }
 
 .form-group { margin-bottom: 1.1rem; }
