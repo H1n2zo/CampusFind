@@ -1,17 +1,15 @@
 <?php
 // ============================================================
 //  admin/actions.php — Handle approve / reject / mark-claimed
-//  All actions are GET with confirmation in the linking page.
-//  For production, consider CSRF tokens or POST forms.
 // ============================================================
 session_start();
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/auth_guard.php';
 
 $action   = $_GET['action']   ?? '';
 $id       = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $redirect = $_GET['redirect']  ?? 'index';
 
-// whitelist redirect targets
 $redirectMap = [
     'index'       => 'index.php',
     'approved'    => 'approved.php',
@@ -29,8 +27,7 @@ if (!$id || !in_array($action, ['approve','reject','claimed'])) {
 
 $db = getDB();
 
-// verify item exists
-$check = $db->prepare("SELECT id, name, status FROM items WHERE id = ?");
+$check = $db->prepare("SELECT id, name, status, image_path FROM items WHERE id = ?");
 $check->execute([$id]);
 $item = $check->fetch();
 
@@ -52,9 +49,16 @@ switch ($action) {
         break;
 
     case 'reject':
+        // delete image file if exists
+        if (!empty($item['image_path'])) {
+            $filePath = __DIR__ . '/../' . $item['image_path'];
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+            }
+        }
         $db->prepare("DELETE FROM items WHERE id = ?")->execute([$id]);
         $_SESSION['flash'] = ['type' => 'error', 'msg' => 'Post rejected and removed.'];
-        $dest = 'index.php'; // always go back to pending after rejection
+        $dest = 'index.php';
         break;
 
     case 'claimed':

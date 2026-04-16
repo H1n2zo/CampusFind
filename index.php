@@ -22,6 +22,20 @@ $cats  = categories();
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CampusFind — Lost &amp; Found Registry</title>
 <link rel="stylesheet" href="assets/style.css">
+<style>
+.card-img {
+  width:100%; height:160px; object-fit:cover;
+  border-bottom:1px solid var(--border); display:block;
+}
+.card-img-placeholder {
+  width:100%; height:90px; background:var(--cream);
+  display:flex; align-items:center; justify-content:center;
+  font-size:28px; border-bottom:1px solid var(--border);
+  color:var(--text-light);
+}
+.upload-preview-wrap { margin-top:8px; }
+.upload-preview-img  { max-width:100%; max-height:140px; border-radius:8px; border:1px solid var(--border); display:none; }
+</style>
 </head>
 <body>
 
@@ -122,6 +136,15 @@ $cats  = categories();
           $dateStr    = date('M j, Y', strtotime($item['created_at']));
         ?>
         <div class="item-card">
+          <!-- Photo -->
+          <?php if (!empty($item['image_path'])): ?>
+            <img class="card-img" src="<?= e($item['image_path']) ?>" alt="<?= e($item['name']) ?>">
+          <?php else: ?>
+            <div class="card-img-placeholder">
+              <?= $isClaimed ? '✅' : ($item['type'] === 'lost' ? '🔍' : '📦') ?>
+            </div>
+          <?php endif; ?>
+
           <div class="card-header">
             <span class="card-type-badge <?= $badgeClass ?>"><?= $badgeLabel ?></span>
             <span class="card-date"><?= $dateStr ?></span>
@@ -153,7 +176,7 @@ $cats  = categories();
       <span class="modal-title">Report an Item</span>
       <button class="modal-close" onclick="closeModal('modal-report')">✕</button>
     </div>
-    <form method="POST" action="ajax/submit_report.php" id="form-report">
+    <form method="POST" action="ajax/submit_report.php" id="form-report" enctype="multipart/form-data">
       <div class="modal-body">
         <div class="report-type-row">
           <div class="report-type-btn" id="rtype-lost" onclick="selectType('lost')">
@@ -187,6 +210,17 @@ $cats  = categories();
         <div class="form-group">
           <label class="form-label">Description <span class="form-optional">(optional)</span></label>
           <textarea class="form-textarea" name="description" rows="3" placeholder="Color, brand, distinguishing features…"></textarea>
+        </div>
+        <!-- Photo upload -->
+        <div class="form-group">
+          <label class="form-label">Photo <span class="form-optional">(optional — helps identification)</span></label>
+          <input class="form-input" type="file" name="item_image" id="item-image-input"
+                 accept="image/jpeg,image/png,image/gif,image/webp"
+                 onchange="previewUpload(this)" style="padding:6px 10px;">
+          <div class="upload-preview-wrap">
+            <img id="upload-preview" class="upload-preview-img" alt="Preview">
+          </div>
+          <p class="form-hint">JPG, PNG, GIF or WebP · max 5 MB</p>
         </div>
         <p class="form-hint">Post will be reviewed by admin before appearing on the board.</p>
       </div>
@@ -255,6 +289,8 @@ function openReportModal() {
   document.getElementById('err-type').style.display = 'none';
   document.getElementById('rtype-lost').className  = 'report-type-btn';
   document.getElementById('rtype-found').className = 'report-type-btn';
+  document.getElementById('upload-preview').style.display = 'none';
+  document.getElementById('item-image-input').value = '';
   document.getElementById('modal-report').classList.add('open');
 }
 
@@ -264,6 +300,20 @@ function selectType(t) {
   document.getElementById('err-type').style.display = 'none';
   document.getElementById('rtype-lost').className  = 'report-type-btn' + (t === 'lost'  ? ' selected-lost'  : '');
   document.getElementById('rtype-found').className = 'report-type-btn' + (t === 'found' ? ' selected-found' : '');
+}
+
+function previewUpload(input) {
+  const preview = document.getElementById('upload-preview');
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+  } else {
+    preview.style.display = 'none';
+  }
 }
 
 document.getElementById('form-report').addEventListener('submit', function(e) {
@@ -282,7 +332,11 @@ function openClaimModal(id, name) {
 
 function openDetailModal(item) {
   detailItemId = item.id;
+  const imgHtml = item.image_path
+    ? `<img src="${escHtml(item.image_path)}" alt="Item photo" style="width:100%;max-height:200px;object-fit:cover;border-radius:10px;border:1px solid #ddd;margin-bottom:1rem;">`
+    : '';
   document.getElementById('detail-body').innerHTML = `
+    ${imgHtml}
     <div class="detail-section"><div class="detail-label">Type</div><div class="detail-value">${item.type.charAt(0).toUpperCase()+item.type.slice(1)} Item</div></div>
     <div class="detail-section"><div class="detail-label">Item Name</div><div class="detail-value" style="font-weight:600;font-size:16px;">${escHtml(item.name)}</div></div>
     <div class="detail-section"><div class="detail-label">Category</div><div class="detail-value">${escHtml(item.category)}</div></div>

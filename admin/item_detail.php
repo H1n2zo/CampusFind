@@ -4,6 +4,7 @@
 // ============================================================
 session_start();
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/auth_guard.php';
 
 $id   = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $item = $id ? getItemWithClaims($id) : null;
@@ -30,6 +31,18 @@ $allClaims = getClaimRequests();
 .detail-card { background: white; border-radius: 14px; border: 1px solid var(--border); padding: 1.5rem; margin-bottom: 1.5rem; }
 .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
 .detail-field { margin-bottom: 0; }
+.item-image-full {
+  width: 100%; max-height: 320px; object-fit: cover;
+  border-radius: 10px; border: 1px solid var(--border);
+  margin-bottom: 1.2rem; display: block;
+}
+.no-image-box {
+  width:100%; height:120px; background:var(--cream);
+  border:2px dashed var(--border-strong); border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--text-light); font-size:13px; margin-bottom:1.2rem;
+  gap: 8px;
+}
 </style>
 </head>
 <body>
@@ -43,7 +56,9 @@ $allClaims = getClaimRequests();
     </div>
   </a>
   <div class="nav-actions">
+    <span style="font-size:12px;color:rgba(255,255,255,0.55);margin-right:4px;">👤 <?= e($_SESSION['admin_username']) ?></span>
     <a class="nav-btn nav-btn-ghost" href="javascript:history.back()">← Back</a>
+    <a class="nav-btn nav-btn-ghost" href="logout.php" onclick="return confirm('Log out?')">Logout</a>
   </div>
 </nav>
 
@@ -66,6 +81,7 @@ $allClaims = getClaimRequests();
     <a class="admin-nav-item" href="dashboard.php"><span>📊</span> Dashboard</a>
     <div class="admin-sidebar-title">Quick</div>
     <a class="admin-nav-item" href="../index.php"><span>↩</span> Back to Board</a>
+    <a class="admin-nav-item" href="logout.php" onclick="return confirm('Log out?')"><span>🚪</span> Logout</a>
   </div>
 
   <div class="admin-main">
@@ -83,6 +99,14 @@ $allClaims = getClaimRequests();
         <?= statusPill($item['status']) ?>
         <span style="font-size:12px;color:var(--text-light);margin-left:auto;">Reported: <?= date('F j, Y g:i A', strtotime($item['created_at'])) ?></span>
       </div>
+
+      <!-- Photo -->
+      <?php if (!empty($item['image_path'])): ?>
+        <img class="item-image-full" src="../<?= e($item['image_path']) ?>" alt="Photo of <?= e($item['name']) ?>">
+      <?php else: ?>
+        <div class="no-image-box"><span>📷</span> No photo uploaded for this item</div>
+      <?php endif; ?>
+
       <div class="detail-grid">
         <div class="detail-field">
           <div class="detail-label">Item Name</div>

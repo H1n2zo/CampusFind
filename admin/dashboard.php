@@ -4,11 +4,11 @@
 // ============================================================
 session_start();
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/auth_guard.php';
 
 $stats     = getStats();
 $allClaims = getClaimRequests();
 
-// recent 8 items
 $db = getDB();
 $recent = $db->query("SELECT * FROM items ORDER BY created_at DESC LIMIT 8")->fetchAll();
 ?>
@@ -31,7 +31,9 @@ $recent = $db->query("SELECT * FROM items ORDER BY created_at DESC LIMIT 8")->fe
     </div>
   </a>
   <div class="nav-actions">
+    <span style="font-size:12px;color:rgba(255,255,255,0.55);margin-right:4px;">👤 <?= e($_SESSION['admin_username']) ?></span>
     <a class="nav-btn nav-btn-ghost" href="../index.php">← Public Board</a>
+    <a class="nav-btn nav-btn-ghost" href="logout.php" onclick="return confirm('Log out?')">Logout</a>
   </div>
 </nav>
 
@@ -54,6 +56,7 @@ $recent = $db->query("SELECT * FROM items ORDER BY created_at DESC LIMIT 8")->fe
     <a class="admin-nav-item active" href="dashboard.php"><span>📊</span> Dashboard</a>
     <div class="admin-sidebar-title">Quick</div>
     <a class="admin-nav-item" href="../index.php"><span>↩</span> Back to Board</a>
+    <a class="admin-nav-item" href="logout.php" onclick="return confirm('Log out?')"><span>🚪</span> Logout</a>
   </div>
 
   <div class="admin-main">
@@ -92,6 +95,7 @@ $recent = $db->query("SELECT * FROM items ORDER BY created_at DESC LIMIT 8")->fe
         <thead>
           <tr>
             <th>#</th>
+            <th>Image</th>
             <th>Item</th>
             <th>Type</th>
             <th>Category</th>
@@ -104,6 +108,14 @@ $recent = $db->query("SELECT * FROM items ORDER BY created_at DESC LIMIT 8")->fe
           <?php foreach ($recent as $item): ?>
           <tr>
             <td style="color:var(--text-light);font-size:11px;"><?= $item['id'] ?></td>
+            <td>
+              <?php if (!empty($item['image_path'])): ?>
+                <img src="../<?= e($item['image_path']) ?>" alt="Item photo"
+                     style="width:40px;height:40px;object-fit:cover;border-radius:6px;border:1px solid var(--border);">
+              <?php else: ?>
+                <span style="font-size:18px;display:block;text-align:center;color:var(--text-light);">📷</span>
+              <?php endif; ?>
+            </td>
             <td><div class="td-title"><?= e($item['name']) ?></div></td>
             <td><?= typeBadge($item['type']) ?></td>
             <td style="font-size:12px;"><?= e($item['category']) ?></td>
